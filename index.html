@@ -162,6 +162,17 @@
           page.textContent = "Failed to load desk: " + e;
           return;
         }
+      } else {
+        var inlineB64 = html.match(/const b64\s*=\s*"([^"]+)"/);
+        if (inlineB64) {
+          try {
+            var bin2 = Uint8Array.from(atob(inlineB64[1]), function (c) { return c.charCodeAt(0); });
+            html = await new Response(new Blob([bin2]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+          } catch (e) {
+            page.textContent = "Failed to load desk: " + e;
+            return;
+          }
+        }
       }
       var parsed = new DOMParser().parseFromString(html, "text/html");
       var css = "";
